@@ -1,0 +1,104 @@
+
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql"; url = env("DATABASE_URL") }
+
+enum Role { BUYER SELLER ADMIN }
+enum SellerStatus { PENDING_PAYMENT PENDING_VERIFICATION ACTIVE REJECTED }
+enum PaymentStatus { PENDING PROCESSING PAID FAILED REFUNDED }
+
+model User {
+  id             String   @id @default(uuid())
+  role           Role
+  email          String   @unique
+  phone          String?
+  passwordHash   String
+  emailVerifiedAt DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  seller         Seller?
+}
+
+model Seller {
+  id           String   @id @default(uuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id])
+  businessName String
+  status       SellerStatus @default(PENDING_PAYMENT)
+  verifiedAt   DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  docs         VerificationDoc[]
+  fees         SellerRegFee[]
+  products     Product[]
+}
+
+model VerificationDoc {
+  id        String   @id @default(uuid())
+  sellerId  String
+  seller    Seller   @relation(fields: [sellerId], references: [id])
+  kind      String
+  url       String
+  createdAt DateTime @default(now())
+}
+
+model Payment {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  purpose      String
+  amountUGX    Int
+  provider     String
+  providerRef  String?
+  status       PaymentStatus @default(PENDING)
+  metadata     Json?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  fee          SellerRegFee?
+}
+
+model SellerRegFee {
+  id         String   @id @default(uuid())
+  sellerId   String
+  seller     Seller   @relation(fields: [sellerId], references: [id])
+  paymentId  String   @unique
+  payment    Payment  @relation(fields: [paymentId], references: [id])
+  amountUGX  Int
+  paidAt     DateTime
+}
+
+model Product {
+  id           String   @id @default(uuid())
+  sellerId     String
+  seller       Seller   @relation(fields: [sellerId], references: [id])
+  name         String
+  description  String?
+  category     String
+  priceUGX     Int
+  stock        Int      @default(0)
+  status       String   @default("active")
+  whatsappE164 String?
+  phoneE164    String?
+  showContact  Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Order {
+  id        String   @id @default(uuid())
+  buyerId   String
+  totalUGX  Int
+  status    String   @default("PLACED")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  items     OrderItem[]
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id])
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  qty       Int
+  priceUGX  Int
+}

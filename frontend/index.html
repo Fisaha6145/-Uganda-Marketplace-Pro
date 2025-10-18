@@ -1,0 +1,1498 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ዕዳጋ ሓበሻ Uganda Marketplace Pro - Secure Trading Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/_sdk/data_sdk.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+        body {
+            box-sizing: border-box;
+        }
+        .section {
+            display: none;
+        }
+        .section.active {
+            display: block;
+        }
+        .hero-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+        }
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .nav-glass {
+            background: linear-gradient(135deg, 
+                rgba(15, 23, 42, 0.95) 0%,
+                rgba(30, 41, 59, 0.95) 25%,
+                rgba(51, 65, 85, 0.95) 50%,
+                rgba(71, 85, 105, 0.95) 75%,
+                rgba(100, 116, 139, 0.95) 100%);
+            backdrop-filter: blur(25px);
+            border-bottom: 2px solid rgba(148, 163, 184, 0.2);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(79, 70, 229, 0.5);
+        }
+        .status-pending { background: #fbbf24; color: #92400e; }
+        .status-approved { background: #10b981; color: #065f46; }
+        .status-rejected { background: #ef4444; color: #991b1b; }
+        .status-paid { background: #3b82f6; color: #1e40af; }
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .rtl { direction: rtl; }
+        .ltr { direction: ltr; }
+    </style>
+  <style>@view-transition { navigation: auto; }</style>
+ </head>
+ <body class="bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 min-h-screen"><!-- Navigation -->
+  <nav class="nav-glass sticky top-0 z-50 shadow-xl">
+   <div class="container mx-auto px-6">
+    <div class="flex items-center justify-between h-20">
+     <div class="flex items-center space-x-4"><button onclick="showSection('home')" class="flex items-center space-x-3 hover:opacity-90 transition-all duration-300">
+       <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-600 to-blue-500 flex items-center justify-center shadow-lg"><span class="text-white text-xl font-bold">🛒</span>
+       </div>
+       <div>
+        <h1 id="platformName" class="text-2xl font-bold text-white">ዕዳጋ ሓበሻ Uganda Marketplace Pro</h1><span class="text-purple-200 text-xs hidden lg:block" data-translate="secure_platform">Secure Trading Platform</span>
+       </div></button>
+     </div><!-- Search Bar -->
+     <div class="hidden md:flex flex-1 max-w-2xl mx-8">
+      <div class="relative w-full"><input type="text" id="headerSearch" data-translate-placeholder="search_products" placeholder="Search products..." class="w-full px-6 py-4 pl-14 pr-24 rounded-2xl glass-effect border-0 text-gray-800 placeholder-gray-500 text-lg">
+       <div class="absolute left-5 top-5 text-purple-400 text-xl">
+        🔍
+       </div><button onclick="performSearch()" class="absolute right-3 top-2 btn-primary text-white px-6 py-2 rounded-xl font-medium text-sm"> <span data-translate="search">Search</span> </button>
+      </div>
+     </div>
+     <div class="flex items-center space-x-4"><!-- Language Selector -->
+      <div class="relative"><select id="languageSelector" onchange="changeLanguage()" class="bg-white bg-opacity-20 text-white px-4 py-2 rounded-xl border border-white border-opacity-30 text-sm font-medium hover:bg-opacity-30 transition-all duration-300"> <option value="en" class="text-gray-800">🇺🇸 English</option> <option value="ti" class="text-gray-800">🇪🇷 ትግርኛ</option> <option value="am" class="text-gray-800">🇪🇹 አማርኛ</option> </select>
+      </div><!-- User Authentication -->
+      <div id="authButtons" class="flex items-center space-x-3"><button onclick="showBuyerRegisterModal()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-xl font-medium transition-all duration-300"> <span data-translate="buyer_signup">Buyer Signup</span> </button> <button onclick="showSellerRegisterModal()" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-xl font-medium transition-all duration-300"> <span data-translate="seller_signup">Seller Signup</span> </button> <button onclick="showLoginModal()" class="bg-white bg-opacity-20 text-white px-6 py-3 rounded-2xl font-semibold hover:bg-opacity-30 transition-all duration-300 border border-white border-opacity-30 shadow-lg"> <span data-translate="login">Login</span> </button>
+      </div><!-- User Menu (Hidden by default) -->
+      <div id="userMenu" class="hidden relative"><button onclick="toggleUserDropdown()" class="flex items-center space-x-3 text-white hover:text-purple-200 transition-all duration-300 px-4 py-3 rounded-2xl glass-effect hover:bg-white hover:bg-opacity-10">
+        <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg"><span id="userInitial" class="text-white font-bold text-lg">U</span>
+        </div>
+        <div class="hidden sm:block text-left">
+         <div id="userName" class="font-medium">
+          User
+         </div>
+         <div id="userRole" class="text-xs text-purple-200">
+          Role
+         </div>
+        </div></button>
+       <div id="userDropdown" class="hidden absolute right-0 mt-3 w-64 glass-effect rounded-2xl shadow-2xl py-3 z-50"><!-- Buyer Menu -->
+        <div id="buyerMenu" class="hidden"><button onclick="showSection('buyerDashboard')" class="flex items-center space-x-3 w-full text-left px-5 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-700 rounded-xl mx-2 transition-all duration-200"> <span>📊</span> <span class="font-medium" data-translate="my_dashboard">My Dashboard</span> </button> <button onclick="showSection('orders')" class="flex items-center space-x-3 w-full text-left px-5 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-700 rounded-xl mx-2 transition-all duration-200"> <span>📦</span> <span class="font-medium" data-translate="my_orders">My Orders</span> </button>
+        </div><!-- Seller Menu -->
+        <div id="sellerMenu" class="hidden"><button onclick="showSection('sellerDashboard')" class="flex items-center space-x-3 w-full text-left px-5 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-700 rounded-xl mx-2 transition-all duration-200"> <span>📊</span> <span class="font-medium" data-translate="seller_dashboard">Seller Dashboard</span> </button> <button onclick="showSection('products')" class="flex items-center space-x-3 w-full text-left px-5 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-700 rounded-xl mx-2 transition-all duration-200"> <span>📦</span> <span class="font-medium" data-translate="my_products">My Products</span> </button> <button onclick="showSection('sales')" class="flex items-center space-x-3 w-full text-left px-5 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-700 rounded-xl mx-2 transition-all duration-200"> <span>💰</span> <span class="font-medium" data-translate="sales_reports">Sales Reports</span> </button>
+        </div><!-- Admin Menu -->
+        <div id="adminMenu" class="hidden"><button onclick="showSection('adminDashboard')" class="flex items-center space-x-3 w-full text-left px-5 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-700 rounded-xl mx-2 transition-all duration-200"> <span>⚙️</span> <span class="font-semibold" data-translate="admin_panel">Admin Panel</span> </button> <button onclick="showSection('userManagement')" class="flex items-center space-x-3 w-full text-left px-5 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-700 rounded-xl mx-2 transition-all duration-200"> <span>👥</span> <span class="font-medium" data-translate="user_management">User Management</span> </button> <button onclick="showSection('paymentVerification')" class="flex items-center space-x-3 w-full text-left px-5 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-700 rounded-xl mx-2 transition-all duration-200"> <span>💳</span> <span class="font-medium" data-translate="payment_verification">Payment Verification</span> </button>
+        </div>
+        <hr class="my-3 mx-4 border-gray-200"><button onclick="logout()" class="flex items-center space-x-3 w-full text-left px-5 py-3 text-red-600 hover:bg-red-50 hover:text-red-700 rounded-xl mx-2 transition-all duration-200"> <span>🚪</span> <span class="font-medium" data-translate="logout">Logout</span> </button>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div>
+  </nav><!-- Main Content -->
+  <div class="container mx-auto px-6 py-8"><!-- Home Section -->
+   <div id="homeSection" class="section active"><!-- Hero Section -->
+    <div class="hero-gradient rounded-3xl text-white p-12 mb-12 relative overflow-hidden">
+     <div class="absolute inset-0 bg-black bg-opacity-10"></div>
+     <div class="relative max-w-5xl mx-auto text-center">
+      <div class="mb-8">
+       <h1 class="text-7xl font-black mb-6 leading-tight">ዕዳጋ ሓበሻ Uganda Marketplace Pro</h1>
+       <p id="welcomeMessage" class="text-3xl mb-4 font-light" data-translate="welcome_message">Welcome to Uganda's Premier Marketplace</p>
+       <p class="text-xl mb-12 opacity-90 max-w-2xl mx-auto" data-translate="hero_description">Secure platform connecting verified buyers and sellers across Uganda. Start trading with confidence today.</p>
+      </div><!-- Registration Cards -->
+      <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+       <div class="glass-effect rounded-3xl p-8 text-gray-800">
+        <div class="text-5xl mb-4">
+         🛍️
+        </div>
+        <h3 class="text-2xl font-bold mb-4" data-translate="for_buyers">For Buyers</h3>
+        <p class="mb-6" data-translate="buyer_description">Register for FREE and start shopping from verified sellers</p>
+        <ul class="text-left mb-4 space-y-2">
+         <li data-translate="free_registration">✅ Free registration</li>
+         <li data-translate="browse_products">✅ Browse verified products</li>
+         <li data-translate="secure_payments">✅ Secure payments</li>
+         <li data-translate="order_tracking">✅ Order tracking</li>
+        </ul>
+        <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+         <h4 class="font-semibold text-green-800 mb-2" data-translate="buyer_fees">Buyer Fees:</h4>
+         <ul class="text-green-700 text-sm space-y-1">
+          <li data-translate="optional_service_fee">• Optional 1% service fee or UGX 1,000-3,000 flat fee</li>
+          <li data-translate="category_specific">• Category-specific rates apply</li>
+          <li data-translate="no_hidden_fees">• No hidden fees - transparent pricing</li>
+         </ul>
+        </div><button onclick="showBuyerRegisterModal()" class="btn-primary text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-xl w-full"> <span data-translate="register_buyer_free">Register as Buyer - FREE</span> </button>
+       </div>
+       <div class="glass-effect rounded-3xl p-8 text-gray-800">
+        <div class="text-5xl mb-4">
+         🏪
+        </div>
+        <h3 class="text-2xl font-bold mb-4" data-translate="for_sellers">For Sellers</h3>
+        <p class="mb-6" data-translate="seller_description">Join our verified seller network</p>
+        <ul class="text-left mb-6 space-y-2">
+         <li data-translate="verified_status">✅ Verified seller status</li>
+         <li data-translate="product_tools">✅ Product management tools</li>
+         <li data-translate="sales_analytics">✅ Sales analytics</li>
+         <li data-translate="secure_payments">✅ Secure payments</li>
+        </ul>
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-6">
+         <div class="mb-4">
+          <p class="text-yellow-800 font-bold text-lg">💰 <span data-translate="registration_fee">Registration Fee:</span> <span id="sellerFee">25,000</span> UGX</p>
+          <p class="text-yellow-700 text-sm" data-translate="one_time_payment">One-time payment for account verification</p>
+         </div>
+         <div class="border-t border-yellow-200 pt-4">
+          <h4 class="font-semibold text-yellow-800 mb-2" data-translate="commission_structure">Commission Structure:</h4>
+          <ul class="text-yellow-700 text-sm space-y-1">
+           <li data-translate="seller_commission">• 5-10% commission per completed sale</li>
+           <li data-translate="category_based_rates">• Category-based rates (2-15% depending on product type)</li>
+           <li data-translate="optional_features">• Optional: Featured listings, pro subscriptions</li>
+          </ul>
+         </div>
+        </div><button onclick="showSellerRegisterModal()" class="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-xl w-full hover:from-yellow-600 hover:to-orange-600 transition-all duration-300"> <span data-translate="register_seller">Register as Seller</span> </button>
+       </div>
+      </div>
+     </div>
+    </div><!-- Main Categories -->
+    <div class="mb-16">
+     <h2 class="text-4xl font-bold text-center mb-12 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent" data-translate="browse_categories">Browse Categories</h2>
+     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-12"><button onclick="showCategoryProducts('vehicles')" class="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-all duration-300 hover:scale-105">
+       <div class="text-4xl mb-3">
+        🚗
+       </div><h3 class="font-semibold text-gray-800 text-sm" data-translate="vehicles">Vehicles</h3></button> <button onclick="showCategoryProducts('property')" class="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-all duration-300 hover:scale-105">
+       <div class="text-4xl mb-3">
+        🏠
+       </div><h3 class="font-semibold text-gray-800 text-sm" data-translate="property">Property &amp; Real Estate</h3></button> <button onclick="showCategoryProducts('mobile')" class="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-all duration-300 hover:scale-105">
+       <div class="text-4xl mb-3">
+        📱
+       </div><h3 class="font-semibold text-gray-800 text-sm" data-translate="mobile">Mobile Phones &amp; Tablets</h3></button> <button onclick="showCategoryProducts('electronics')" class="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-all duration-300 hover:scale-105">
+       <div class="text-4xl mb-3">
+        💻
+       </div><h3 class="font-semibold text-gray-800 text-sm" data-translate="electronics">Electronics</h3></button> <button onclick="showCategoryProducts('home')" class="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-all duration-300 hover:scale-105">
+       <div class="text-4xl mb-3">
+        🛋️
+       </div><h3 class="font-semibold text-gray-800 text-sm" data-translate="home_furniture">Home &amp; Furniture</h3></button> <button onclick="showCategoryProducts('fashion')" class="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-all duration-300 hover:scale-105">
+       <div class="text-4xl mb-3">
+        👗
+       </div><h3 class="font-semibold text-gray-800 text-sm" data-translate="fashion">Fashion</h3></button> <button onclick="showCategoryProducts('beauty')" class="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-all duration-300 hover:scale-105">
+       <div class="text-4xl mb-3">
+        💄
+       </div><h3 class="font-semibold text-gray-800 text-sm" data-translate="beauty">Beauty &amp; Personal Care</h3></button> <button onclick="showCategoryProducts('services')" class="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-all duration-300 hover:scale-105">
+       <div class="text-4xl mb-3">
+        🔧
+       </div><h3 class="font-semibold text-gray-800 text-sm" data-translate="services">Services</h3></button> <button onclick="showCategoryProducts('repair')" class="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-all duration-300 hover:scale-105">
+       <div class="text-4xl mb-3">
+        🔨
+       </div><h3 class="font-semibold text-gray-800 text-sm" data-translate="repair">Repair &amp; Construction</h3></button> <button onclick="showCategoryProducts('commercial')" class="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-all duration-300 hover:scale-105">
+       <div class="text-4xl mb-3">
+        ⚙️
+       </div><h3 class="font-semibold text-gray-800 text-sm" data-translate="commercial">Commercial Equipment</h3></button> <button onclick="showCategoryProducts('leisure')" class="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-all duration-300 hover:scale-105">
+       <div class="text-4xl mb-3">
+        🎯
+       </div><h3 class="font-semibold text-gray-800 text-sm" data-translate="leisure">Leisure &amp; Activities</h3></button> <button onclick="showCategoryProducts('babies')" class="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-all duration-300 hover:scale-105">
+       <div class="text-4xl mb-3">
+        👶
+       </div><h3 class="font-semibold text-gray-800 text-sm" data-translate="babies">Babies &amp; Kids</h3></button> <button onclick="showCategoryProducts('food')" class="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-all duration-300 hover:scale-105">
+       <div class="text-4xl mb-3">
+        🌾
+       </div><h3 class="font-semibold text-gray-800 text-sm" data-translate="food">Food &amp; Agriculture</h3></button> <button onclick="showCategoryProducts('animals')" class="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-all duration-300 hover:scale-105">
+       <div class="text-4xl mb-3">
+        🐕
+       </div><h3 class="font-semibold text-gray-800 text-sm" data-translate="animals">Animals &amp; Pets</h3></button> <button onclick="showCategoryProducts('jobs')" class="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-all duration-300 hover:scale-105">
+       <div class="text-4xl mb-3">
+        💼
+       </div><h3 class="font-semibold text-gray-800 text-sm" data-translate="jobs">Jobs &amp; Employment</h3></button> <button onclick="showCategoryProducts('guesthouse')" class="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-all duration-300 hover:scale-105">
+       <div class="text-4xl mb-3">
+        🏨
+       </div><h3 class="font-semibold text-gray-800 text-sm" data-translate="guesthouse">Guest House</h3></button>
+     </div>
+    </div><!-- Fee Structure Section -->
+    <div class="mb-16">
+     <h2 class="text-4xl font-bold text-center mb-12 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent" data-translate="fee_structure">Fee Structure &amp; Pricing</h2><!-- Commission Model -->
+     <div class="bg-white rounded-3xl shadow-xl p-8 mb-8">
+      <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center" data-translate="commission_model">💰 Commission Model</h3>
+      <div class="grid md:grid-cols-2 gap-8">
+       <div class="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl p-6">
+        <h4 class="text-xl font-semibold text-orange-800 mb-4">🏪 <span data-translate="seller_fees">Seller Fees</span></h4>
+        <ul class="space-y-3 text-gray-700">
+         <li class="flex items-start space-x-2"><span class="text-orange-500 font-bold">•</span> <span><strong data-translate="registration">Registration:</strong> <span data-translate="ugx_25000_onetime">UGX 25,000 (one-time)</span></span></li>
+         <li class="flex items-start space-x-2"><span class="text-orange-500 font-bold">•</span> <span><strong data-translate="commission">Commission:</strong> <span data-translate="commission_range">5-10% per completed sale</span></span></li>
+         <li class="flex items-start space-x-2"><span class="text-orange-500 font-bold">•</span> <span><strong data-translate="featured_listings">Featured Listings:</strong> <span data-translate="ugx_10000_20000">UGX 10,000-20,000</span></span></li>
+        </ul>
+       </div>
+       <div class="bg-gradient-to-br from-green-50 to-blue-50 rounded-xl p-6">
+        <h4 class="text-xl font-semibold text-green-800 mb-4">🛍️ <span data-translate="buyer_fees">Buyer Fees</span></h4>
+        <ul class="space-y-3 text-gray-700">
+         <li class="flex items-start space-x-2"><span class="text-green-500 font-bold">•</span> <span><strong data-translate="registration">Registration:</strong> <span data-translate="completely_free">Completely FREE</span></span></li>
+         <li class="flex items-start space-x-2"><span class="text-green-500 font-bold">•</span> <span><strong data-translate="service_fee">Service Fee:</strong> <span data-translate="optional_1_percent">Optional 1% or UGX 1,000-3,000</span></span></li>
+         <li class="flex items-start space-x-2"><span class="text-green-500 font-bold">•</span> <span><strong data-translate="escrow_protection">Escrow Protection:</strong> <span data-translate="included_free">Included FREE</span></span></li>
+        </ul>
+       </div>
+      </div>
+     </div><!-- Category-Based Rates -->
+     <div class="bg-white rounded-3xl shadow-xl p-8 mb-8">
+      <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center" data-translate="category_rates">📊 Category-Based Commission Rates</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+       <div class="bg-blue-50 rounded-xl p-4">
+        <h4 class="font-semibold text-blue-800 mb-2">📱 <span data-translate="electronics_phones">Electronics/Phones</span></h4>
+        <p class="text-blue-700 text-sm"><strong data-translate="seller">Seller:</strong> <span data-translate="rate_5_7_percent">5-7%</span></p>
+        <p class="text-blue-700 text-sm"><strong data-translate="buyer">Buyer:</strong> <span data-translate="rate_1_percent">1%</span></p>
+       </div>
+       <div class="bg-pink-50 rounded-xl p-4">
+        <h4 class="font-semibold text-pink-800 mb-2">👗 <span data-translate="fashion_beauty">Fashion/Beauty</span></h4>
+        <p class="text-pink-700 text-sm"><strong data-translate="seller">Seller:</strong> <span data-translate="rate_10_15_percent">10-15%</span></p>
+        <p class="text-pink-700 text-sm"><strong data-translate="buyer">Buyer:</strong> <span data-translate="rate_1_percent">1%</span></p>
+       </div>
+       <div class="bg-purple-50 rounded-xl p-4">
+        <h4 class="font-semibold text-purple-800 mb-2">🚗 <span data-translate="vehicles_machinery">Vehicles/Machinery</span></h4>
+        <p class="text-purple-700 text-sm"><strong data-translate="seller">Seller:</strong> <span data-translate="rate_2_4_percent">2-4%</span></p>
+        <p class="text-purple-700 text-sm"><strong data-translate="buyer">Buyer:</strong> <span data-translate="flat_ugx_10000">Flat UGX 10,000</span></p>
+       </div>
+       <div class="bg-green-50 rounded-xl p-4">
+        <h4 class="font-semibold text-green-800 mb-2">🏠 <span data-translate="property_realestate">Property/Real Estate</span></h4>
+        <p class="text-green-700 text-sm"><strong data-translate="seller">Seller:</strong> <span data-translate="rate_3_5_percent">3-5%</span></p>
+        <p class="text-green-700 text-sm"><strong data-translate="buyer">Buyer:</strong> <span data-translate="none">None</span></p>
+       </div>
+       <div class="bg-yellow-50 rounded-xl p-4">
+        <h4 class="font-semibold text-yellow-800 mb-2">🌾 <span data-translate="agriculture_food">Agriculture/Food</span></h4>
+        <p class="text-yellow-700 text-sm"><strong data-translate="seller">Seller:</strong> <span data-translate="rate_5_8_percent">5-8%</span></p>
+        <p class="text-yellow-700 text-sm"><strong data-translate="buyer">Buyer:</strong> <span data-translate="rate_0_1_percent">0-1%</span></p>
+       </div>
+       <div class="bg-indigo-50 rounded-xl p-4">
+        <h4 class="font-semibold text-indigo-800 mb-2">💼 <span data-translate="jobs_services">Jobs/Services</span></h4>
+        <p class="text-indigo-700 text-sm"><strong data-translate="seller">Seller:</strong> <span data-translate="rate_5_10_percent">5-10%</span></p>
+        <p class="text-indigo-700 text-sm"><strong data-translate="buyer">Buyer:</strong> <span data-translate="ugx_1000_2000">UGX 1,000-2,000</span></p>
+       </div>
+      </div>
+     </div><!-- Revenue Add-ons -->
+     <div class="bg-gradient-to-br from-purple-100 to-pink-100 rounded-3xl p-8">
+      <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center" data-translate="premium_features">⚙️ Premium Features &amp; Add-ons</h3>
+      <div class="grid md:grid-cols-2 gap-6">
+       <div class="bg-white rounded-xl p-6 shadow-lg">
+        <h4 class="text-lg font-semibold text-purple-800 mb-4">🌟 <span data-translate="for_sellers">For Sellers</span></h4>
+        <ul class="space-y-2 text-gray-700">
+         <li><strong data-translate="pro_subscription">Pro Subscription:</strong> <span data-translate="ugx_50000_100000_monthly">UGX 50,000-100,000/month</span></li>
+         <li><strong data-translate="featured_listings">Featured Listings:</strong> <span data-translate="ugx_10000_20000_per_item">UGX 10,000-20,000 per item</span></li>
+         <li><strong data-translate="priority_support">Priority Support:</strong> <span data-translate="included_in_pro">Included in Pro</span></li>
+         <li><strong data-translate="analytics_tools">Analytics Tools:</strong> <span data-translate="advanced_reporting">Advanced reporting</span></li>
+        </ul>
+       </div>
+       <div class="bg-white rounded-xl p-6 shadow-lg">
+        <h4 class="text-lg font-semibold text-green-800 mb-4">🛡️ <span data-translate="for_buyers">For Buyers</span></h4>
+        <ul class="space-y-2 text-gray-700">
+         <li><strong data-translate="escrow_service">Escrow Service:</strong> <span data-translate="secure_transactions">Secure transactions</span></li>
+         <li><strong data-translate="buyer_protection">Buyer Protection:</strong> <span data-translate="money_back_guarantee">Money-back guarantee</span></li>
+         <li><strong data-translate="premium_support">Premium Support:</strong> <span data-translate="priority_assistance">Priority assistance</span></li>
+         <li><strong data-translate="early_access">Early Access:</strong> <span data-translate="new_products_first">New products first</span></li>
+        </ul>
+       </div>
+      </div>
+     </div>
+    </div><!-- Featured Products -->
+    <div class="mb-16">
+     <h2 class="text-3xl font-bold text-center mb-8 text-gray-800" data-translate="featured_products">Featured Products</h2>
+     <div id="featuredProducts" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div class="bg-white rounded-xl shadow-lg p-8 text-center">
+       <div class="text-6xl mb-4">
+        📦
+       </div>
+       <h3 class="text-xl font-semibold text-gray-800 mb-2" data-translate="no_products_yet">No products yet</h3>
+       <p class="text-gray-600" data-translate="sellers_will_add">Sellers will add products after registration and approval</p>
+      </div>
+     </div>
+    </div>
+   </div><!-- Other sections remain the same but with data-translate attributes added --> <!-- Buyer Dashboard -->
+   <div id="buyerDashboardSection" class="section">
+    <h2 class="text-3xl font-bold text-gray-800 mb-8" data-translate="buyer_dashboard">Buyer Dashboard</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+     <div class="bg-white rounded-xl shadow-lg p-6">
+      <div class="flex items-center justify-between">
+       <div>
+        <p class="text-gray-600" data-translate="total_orders">Total Orders</p>
+        <p id="totalOrders" class="text-3xl font-bold text-blue-600">0</p>
+       </div>
+       <div class="text-4xl">
+        📦
+       </div>
+      </div>
+     </div>
+     <div class="bg-white rounded-xl shadow-lg p-6">
+      <div class="flex items-center justify-between">
+       <div>
+        <p class="text-gray-600" data-translate="total_spent">Total Spent</p>
+        <p id="totalSpent" class="text-3xl font-bold text-green-600">0 UGX</p>
+       </div>
+       <div class="text-4xl">
+        💰
+       </div>
+      </div>
+     </div>
+     <div class="bg-white rounded-xl shadow-lg p-6">
+      <div class="flex items-center justify-between">
+       <div>
+        <p class="text-gray-600" data-translate="pending_orders">Pending Orders</p>
+        <p id="pendingOrders" class="text-3xl font-bold text-yellow-600">0</p>
+       </div>
+       <div class="text-4xl">
+        ⏳
+       </div>
+      </div>
+     </div>
+    </div>
+    <div class="bg-white rounded-xl shadow-lg p-8">
+     <h3 class="text-xl font-semibold mb-6" data-translate="recent_orders">Recent Orders</h3>
+     <div id="recentOrders" class="text-center text-gray-600">
+      <div class="text-4xl mb-4">
+       📋
+      </div>
+      <p data-translate="no_orders_yet">No orders yet. Start shopping to see your orders here!</p>
+     </div>
+    </div>
+   </div><!-- Seller Dashboard -->
+   <div id="sellerDashboardSection" class="section">
+    <h2 class="text-3xl font-bold text-gray-800 mb-8" data-translate="seller_dashboard">Seller Dashboard</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+     <div class="bg-white rounded-xl shadow-lg p-6">
+      <div class="flex items-center justify-between">
+       <div>
+        <p class="text-gray-600" data-translate="total_products">Total Products</p>
+        <p id="totalProducts" class="text-3xl font-bold text-blue-600">0</p>
+       </div>
+       <div class="text-4xl">
+        📦
+       </div>
+      </div>
+     </div>
+     <div class="bg-white rounded-xl shadow-lg p-6">
+      <div class="flex items-center justify-between">
+       <div>
+        <p class="text-gray-600" data-translate="total_sales">Total Sales</p>
+        <p id="totalSales" class="text-3xl font-bold text-green-600">0 UGX</p>
+       </div>
+       <div class="text-4xl">
+        💰
+       </div>
+      </div>
+     </div>
+     <div class="bg-white rounded-xl shadow-lg p-6">
+      <div class="flex items-center justify-between">
+       <div>
+        <p class="text-gray-600" data-translate="pending_sales">Pending Sales</p>
+        <p id="pendingSales" class="text-3xl font-bold text-yellow-600">0</p>
+       </div>
+       <div class="text-4xl">
+        ⏳
+       </div>
+      </div>
+     </div>
+    </div>
+    <div class="bg-white rounded-xl shadow-lg p-8">
+     <h3 class="text-xl font-semibold mb-6" data-translate="recent_sales">Recent Sales</h3>
+     <div id="recentSales" class="text-center text-gray-600">
+      <div class="text-4xl mb-4">
+       📊
+      </div>
+      <p data-translate="no_sales_yet">No sales yet. Add products to start selling!</p>
+     </div>
+    </div>
+   </div><!-- Products Section -->
+   <div id="productsSection" class="section">
+    <div class="flex justify-between items-center mb-8">
+     <h2 class="text-3xl font-bold text-gray-800" data-translate="my_products">My Products</h2><button onclick="showAddProductModal()" class="btn-primary text-white px-6 py-3 rounded-xl font-medium"> <span data-translate="add_product">Add Product</span> </button>
+    </div>
+    <div id="productsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+     <div class="bg-white rounded-xl shadow-lg p-8 text-center">
+      <div class="text-6xl mb-4">
+       📦
+      </div>
+      <h3 class="text-xl font-semibold text-gray-800 mb-2" data-translate="no_products_yet">No products yet</h3>
+      <p class="text-gray-600 mb-4" data-translate="add_first_product">Add your first product to start selling</p><button onclick="showAddProductModal()" class="btn-primary text-white px-4 py-2 rounded-lg"> <span data-translate="add_product">Add Product</span> </button>
+     </div>
+    </div>
+   </div><!-- Sales Section -->
+   <div id="salesSection" class="section">
+    <h2 class="text-3xl font-bold text-gray-800 mb-8" data-translate="sales_reports">Sales Reports</h2>
+    <div class="bg-white rounded-xl shadow-lg p-8">
+     <div class="text-center text-gray-600">
+      <div class="text-6xl mb-4">
+       📈
+      </div>
+      <h3 class="text-xl font-semibold text-gray-800 mb-2" data-translate="no_sales_data">No sales data yet</h3>
+      <p data-translate="sales_appear_here">Your sales reports will appear here once you start selling</p>
+     </div>
+    </div>
+   </div><!-- Orders Section -->
+   <div id="ordersSection" class="section">
+    <h2 class="text-3xl font-bold text-gray-800 mb-8" data-translate="my_orders">My Orders</h2>
+    <div class="bg-white rounded-xl shadow-lg p-8">
+     <div id="ordersList" class="text-center text-gray-600">
+      <div class="text-6xl mb-4">
+       📋
+      </div>
+      <h3 class="text-xl font-semibold text-gray-800 mb-2" data-translate="no_orders_yet">No orders yet</h3>
+      <p data-translate="orders_appear_here">Your orders will appear here after you make purchases</p>
+     </div>
+    </div>
+   </div><!-- Admin Dashboard -->
+   <div id="adminDashboardSection" class="section">
+    <h2 class="text-3xl font-bold text-gray-800 mb-8" data-translate="admin_panel">Admin Panel</h2>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+     <div class="bg-white rounded-xl shadow-lg p-6">
+      <div class="flex items-center justify-between">
+       <div>
+        <p class="text-gray-600" data-translate="total_users">Total Users</p>
+        <p id="adminTotalUsers" class="text-3xl font-bold text-blue-600">0</p>
+       </div>
+       <div class="text-4xl">
+        👥
+       </div>
+      </div>
+     </div>
+     <div class="bg-white rounded-xl shadow-lg p-6">
+      <div class="flex items-center justify-between">
+       <div>
+        <p class="text-gray-600" data-translate="pending_approvals">Pending Approvals</p>
+        <p id="adminPendingApprovals" class="text-3xl font-bold text-yellow-600">0</p>
+       </div>
+       <div class="text-4xl">
+        ⏳
+       </div>
+      </div>
+     </div>
+     <div class="bg-white rounded-xl shadow-lg p-6">
+      <div class="flex items-center justify-between">
+       <div>
+        <p class="text-gray-600" data-translate="total_products">Total Products</p>
+        <p id="adminTotalProducts" class="text-3xl font-bold text-green-600">0</p>
+       </div>
+       <div class="text-4xl">
+        📦
+       </div>
+      </div>
+     </div>
+     <div class="bg-white rounded-xl shadow-lg p-6">
+      <div class="flex items-center justify-between">
+       <div>
+        <p class="text-gray-600" data-translate="total_revenue">Total Revenue</p>
+        <p id="adminTotalRevenue" class="text-3xl font-bold text-purple-600">0 UGX</p>
+       </div>
+       <div class="text-4xl">
+        💰
+       </div>
+      </div>
+     </div>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+     <div class="bg-white rounded-xl shadow-lg p-6">
+      <h3 class="text-xl font-semibold mb-4" data-translate="recent_registrations">Recent Registrations</h3>
+      <div id="recentRegistrations" class="space-y-3">
+       <p class="text-gray-600 text-center" data-translate="no_registrations">No recent registrations</p>
+      </div>
+     </div>
+     <div class="bg-white rounded-xl shadow-lg p-6">
+      <h3 class="text-xl font-semibold mb-4" data-translate="system_status">System Status</h3>
+      <div class="space-y-3">
+       <div class="flex items-center justify-between"><span data-translate="platform_status">Platform Status</span> <span class="text-green-600 font-semibold" data-translate="online">Online</span>
+       </div>
+       <div class="flex items-center justify-between"><span data-translate="payment_system">Payment System</span> <span class="text-green-600 font-semibold" data-translate="active">Active</span>
+       </div>
+       <div class="flex items-center justify-between"><span data-translate="user_registrations">User Registrations</span> <span class="text-green-600 font-semibold" data-translate="open">Open</span>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div><!-- User Management Section -->
+   <div id="userManagementSection" class="section">
+    <h2 class="text-3xl font-bold text-gray-800 mb-8" data-translate="user_management">User Management</h2>
+    <div class="bg-white rounded-xl shadow-lg p-8">
+     <div class="flex justify-between items-center mb-6">
+      <h3 class="text-xl font-semibold" data-translate="all_users">All Users</h3>
+      <div class="flex space-x-2"><button onclick="filterUsers('all')" class="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300"> <span data-translate="all">All</span> </button> <button onclick="filterUsers('buyer')" class="px-4 py-2 rounded-lg bg-green-100 text-green-700 hover:bg-green-200"> <span data-translate="buyers">Buyers</span> </button> <button onclick="filterUsers('seller')" class="px-4 py-2 rounded-lg bg-yellow-100 text-yellow-700 hover:bg-yellow-200"> <span data-translate="sellers">Sellers</span> </button>
+      </div>
+     </div>
+     <div id="usersList" class="text-center text-gray-600">
+      <div class="text-6xl mb-4">
+       👥
+      </div>
+      <p data-translate="no_users_registered">No users registered yet</p>
+     </div>
+    </div>
+   </div><!-- Payment Verification Section -->
+   <div id="paymentVerificationSection" class="section">
+    <h2 class="text-3xl font-bold text-gray-800 mb-8" data-translate="payment_verification">Payment Verification</h2>
+    <div class="bg-white rounded-xl shadow-lg p-8">
+     <h3 class="text-xl font-semibold mb-6" data-translate="pending_payments">Pending Payment Verifications</h3>
+     <div id="pendingPaymentsList" class="text-center text-gray-600">
+      <div class="text-6xl mb-4">
+       💳
+      </div>
+      <p data-translate="no_pending_payments">No pending payment verifications</p>
+     </div>
+    </div>
+   </div>
+  </div><!-- Buyer Registration Modal -->
+  <div id="buyerRegisterModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+   <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
+    <div class="flex justify-between items-center mb-6">
+     <h2 class="text-2xl font-bold text-gray-800">🛍️ <span data-translate="buyer_registration">Buyer Registration</span></h2><button onclick="closeModal('buyerRegisterModal')" class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+    </div>
+    <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+     <p class="text-green-800 font-semibold">✅ <span data-translate="free_registration">FREE Registration</span></p>
+     <p class="text-green-700 text-sm" data-translate="no_fees_buyers">No fees required for buyers</p>
+    </div>
+    <form onsubmit="handleBuyerRegister(event)">
+     <div class="mb-4"><label class="block text-sm font-medium text-gray-700 mb-2" data-translate="full_name">Full Name</label> <input type="text" id="buyerName" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+     </div>
+     <div class="mb-4"><label class="block text-sm font-medium text-gray-700 mb-2" data-translate="email_address">Email Address</label> <input type="email" id="buyerEmail" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+     </div>
+     <div class="mb-4"><label class="block text-sm font-medium text-gray-700 mb-2" data-translate="phone_number">Phone Number</label> <input type="tel" id="buyerPhone" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+     </div>
+     <div class="mb-6"><label class="block text-sm font-medium text-gray-700 mb-2" data-translate="password">Password</label> <input type="password" id="buyerPassword" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+     </div><button type="submit" class="w-full btn-primary text-white py-3 rounded-lg"> <span id="buyerRegisterBtn" data-translate="register_buyer_free">Register as Buyer - FREE</span>
+      <div id="buyerRegisterSpinner" class="loading-spinner mx-auto hidden"></div></button>
+    </form>
+   </div>
+  </div><!-- Seller Registration Modal -->
+  <div id="sellerRegisterModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+   <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
+    <div class="flex justify-between items-center mb-6">
+     <h2 class="text-2xl font-bold text-gray-800">🏪 <span data-translate="seller_registration">Seller Registration</span></h2><button onclick="closeModal('sellerRegisterModal')" class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+    </div>
+    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+     <p class="text-yellow-800 font-semibold">💰 <span data-translate="registration_fee">Registration Fee:</span> <span id="modalSellerFee">25,000</span> UGX</p>
+     <p class="text-yellow-700 text-sm" data-translate="one_time_payment">One-time payment for account verification</p>
+    </div>
+    <form onsubmit="handleSellerRegister(event)">
+     <div class="mb-4"><label class="block text-sm font-medium text-gray-700 mb-2" data-translate="business_name">Business Name</label> <input type="text" id="sellerBusinessName" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+     </div>
+     <div class="mb-4"><label class="block text-sm font-medium text-gray-700 mb-2" data-translate="full_name">Full Name</label> <input type="text" id="sellerName" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+     </div>
+     <div class="mb-4"><label class="block text-sm font-medium text-gray-700 mb-2" data-translate="email_address">Email Address</label> <input type="email" id="sellerEmail" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+     </div>
+     <div class="mb-4"><label class="block text-sm font-medium text-gray-700 mb-2" data-translate="phone_number">Phone Number</label> <input type="tel" id="sellerPhone" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+     </div>
+     <div class="mb-6"><label class="block text-sm font-medium text-gray-700 mb-2" data-translate="password">Password</label> <input type="password" id="sellerPassword" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+     </div><button type="submit" class="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white py-3 rounded-lg hover:from-yellow-600 hover:to-orange-600 transition-all duration-300"> <span id="sellerRegisterBtn" data-translate="register_seller">Register as Seller</span>
+      <div id="sellerRegisterSpinner" class="loading-spinner mx-auto hidden"></div></button>
+    </form>
+   </div>
+  </div><!-- Login Modal -->
+  <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+   <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
+    <div class="flex justify-between items-center mb-6">
+     <h2 class="text-2xl font-bold text-gray-800">🔐 <span data-translate="login">Login</span></h2><button onclick="closeModal('loginModal')" class="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+    </div>
+    <form onsubmit="handleLogin(event)">
+     <div class="mb-4"><label class="block text-sm font-medium text-gray-700 mb-2" data-translate="email_address">Email Address</label> <input type="email" id="loginEmail" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+     </div>
+     <div class="mb-6"><label class="block text-sm font-medium text-gray-700 mb-2" data-translate="password">Password</label> <input type="password" id="loginPassword" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+     </div><button type="submit" class="w-full btn-primary text-white py-3 rounded-lg"> <span id="loginBtn" data-translate="login">Login</span>
+      <div id="loginSpinner" class="loading-spinner mx-auto hidden"></div></button>
+    </form>
+   </div>
+  </div>
+  <script>
+        // Language translations
+        const translations = {
+            en: {
+                secure_platform: "Secure Trading Platform",
+                search_products: "Search products...",
+                search: "Search",
+                buyer_signup: "Buyer Signup",
+                seller_signup: "Seller Signup",
+                login: "Login",
+                my_dashboard: "My Dashboard",
+                my_orders: "My Orders",
+                seller_dashboard: "Seller Dashboard",
+                my_products: "My Products",
+                sales_reports: "Sales Reports",
+                admin_panel: "Admin Panel",
+                user_management: "User Management",
+                payment_verification: "Payment Verification",
+                logout: "Logout",
+                welcome_message: "Welcome to Uganda's Premier Marketplace",
+                hero_description: "Secure platform connecting verified buyers and sellers across Uganda. Start trading with confidence today.",
+                for_buyers: "For Buyers",
+                buyer_description: "Register for FREE and start shopping from verified sellers",
+                free_registration: "✅ Free registration",
+                browse_products: "✅ Browse verified products",
+                secure_payments: "✅ Secure payments",
+                order_tracking: "✅ Order tracking",
+                register_buyer_free: "Register as Buyer - FREE",
+                for_sellers: "For Sellers",
+                seller_description: "Join our verified seller network",
+                verified_status: "✅ Verified seller status",
+                product_tools: "✅ Product management tools",
+                sales_analytics: "✅ Sales analytics",
+                registration_fee: "Registration Fee:",
+                one_time_payment: "One-time payment for account verification",
+                register_seller: "Register as Seller",
+                browse_categories: "Browse Categories",
+                vehicles: "Vehicles",
+                property: "Property & Real Estate",
+                mobile: "Mobile Phones & Tablets",
+                electronics: "Electronics",
+                home_furniture: "Home & Furniture",
+                fashion: "Fashion",
+                beauty: "Beauty & Personal Care",
+                services: "Services",
+                repair: "Repair & Construction",
+                commercial: "Commercial Equipment",
+                leisure: "Leisure & Activities",
+                babies: "Babies & Kids",
+                food: "Food & Agriculture",
+                animals: "Animals & Pets",
+                jobs: "Jobs & Employment",
+                guesthouse: "Guest House",
+                featured_products: "Featured Products",
+                back_to_home: "Back to Home",
+                category_description: "Browse products in this category",
+                no_products_category: "No products in this category yet",
+                sellers_add_products: "Sellers will add products after registration and approval",
+                browse_other_categories: "Browse Other Categories",
+                view_details: "View Details",
+                no_products_yet: "No products yet",
+                sellers_will_add: "Sellers will add products after registration and approval",
+                buyer_dashboard: "Buyer Dashboard",
+                total_orders: "Total Orders",
+                total_spent: "Total Spent",
+                pending_orders: "Pending Orders",
+                recent_orders: "Recent Orders",
+                no_orders_yet: "No orders yet. Start shopping to see your orders here!",
+                buyer_registration: "Buyer Registration",
+                no_fees_buyers: "No fees required for buyers",
+                full_name: "Full Name",
+                email_address: "Email Address",
+                phone_number: "Phone Number",
+                password: "Password",
+                commission_structure: "Commission Structure:",
+                seller_commission: "• 5-10% commission per completed sale",
+                category_based_rates: "• Category-based rates (2-15% depending on product type)",
+                optional_features: "• Optional: Featured listings, pro subscriptions",
+                buyer_fees: "Buyer Fees:",
+                optional_service_fee: "• Optional 1% service fee or UGX 1,000-3,000 flat fee",
+                category_specific: "• Category-specific rates apply",
+                no_hidden_fees: "• No hidden fees - transparent pricing",
+                fee_structure: "Fee Structure & Pricing",
+                commission_model: "💰 Commission Model",
+                seller_fees: "Seller Fees",
+                registration: "Registration",
+                ugx_25000_onetime: "UGX 25,000 (one-time)",
+                commission: "Commission",
+                commission_range: "5-10% per completed sale",
+                featured_listings: "Featured Listings",
+                ugx_10000_20000: "UGX 10,000-20,000",
+                completely_free: "Completely FREE",
+                service_fee: "Service Fee",
+                optional_1_percent: "Optional 1% or UGX 1,000-3,000",
+                escrow_protection: "Escrow Protection",
+                included_free: "Included FREE",
+                category_rates: "📊 Category-Based Commission Rates",
+                electronics_phones: "Electronics/Phones",
+                seller: "Seller",
+                buyer: "Buyer",
+                rate_5_7_percent: "5-7%",
+                rate_1_percent: "1%",
+                fashion_beauty: "Fashion/Beauty",
+                rate_10_15_percent: "10-15%",
+                vehicles_machinery: "Vehicles/Machinery",
+                rate_2_4_percent: "2-4%",
+                flat_ugx_10000: "Flat UGX 10,000",
+                property_realestate: "Property/Real Estate",
+                rate_3_5_percent: "3-5%",
+                none: "None",
+                agriculture_food: "Agriculture/Food",
+                rate_5_8_percent: "5-8%",
+                rate_0_1_percent: "0-1%",
+                jobs_services: "Jobs/Services",
+                rate_5_10_percent: "5-10%",
+                ugx_1000_2000: "UGX 1,000-2,000",
+                premium_features: "⚙️ Premium Features & Add-ons",
+                pro_subscription: "Pro Subscription",
+                ugx_50000_100000_monthly: "UGX 50,000-100,000/month",
+                ugx_10000_20000_per_item: "UGX 10,000-20,000 per item",
+                priority_support: "Priority Support",
+                included_in_pro: "Included in Pro",
+                analytics_tools: "Analytics Tools",
+                advanced_reporting: "Advanced reporting",
+                escrow_service: "Escrow Service",
+                secure_transactions: "Secure transactions",
+                buyer_protection: "Buyer Protection",
+                money_back_guarantee: "Money-back guarantee",
+                premium_support: "Premium Support",
+                priority_assistance: "Priority assistance",
+                early_access: "Early Access",
+                new_products_first: "New products first"
+            },
+            ti: {
+                secure_platform: "ውሑስ ንግዲ መድረኽ",
+                search_products: "ፍርያት ድለዩ...",
+                search: "ድለይ",
+                buyer_signup: "ዓሪፍ ምዝገባ",
+                seller_signup: "ሻጢ ምዝገባ",
+                login: "እቶት",
+                my_dashboard: "ናይ ዳሽቦርድ",
+                my_orders: "ናይ ትእዛዛት",
+                seller_dashboard: "ሻጢ ዳሽቦርድ",
+                my_products: "ናይ ፍርያት",
+                sales_reports: "ሽያጭ ሪፖርታት",
+                admin_panel: "አስተዳዳሪ ፓነል",
+                user_management: "ተጠቃሚ ምሕደራ",
+                payment_verification: "ክፍሊት ምርግጋጽ",
+                logout: "ወጻኢ",
+                welcome_message: "ናብ ዋና ዕዳጋ ኡጋንዳ እንቋዕ ብደሓን መጻእኩም",
+                hero_description: "ኣብ ኡጋንዳ ዝተረጋገጹ ዓረፍቲን ሻጠትን ዝራኸብ ውሑስ መድረኽ። ሎሚ ብተኣማንነት ንግዲ ጀምሩ።",
+                for_buyers: "ንዓረፍቲ",
+                buyer_description: "ብነጻ ተመዝገቡን ካብ ዝተረጋገጹ ሻጠት ዕዳጋ ጀምሩ",
+                free_registration: "✅ ነጻ ምዝገባ",
+                browse_products: "✅ ዝተረጋገጹ ፍርያት ምርኣይ",
+                secure_payments: "✅ ውሑስ ክፍሊት",
+                order_tracking: "✅ ትእዛዝ ምክትታል",
+                register_buyer_free: "ከም ዓሪፍ ተመዝገብ - ነጻ",
+                for_sellers: "ንሻጠት",
+                seller_description: "ናብ ዝተረጋገጸ ሻጢ መርበብ ተጸንበሩ",
+                verified_status: "✅ ዝተረጋገጸ ሻጢ ደረጃ",
+                product_tools: "✅ ፍርያት ምሕደራ መሳርሒታት",
+                sales_analytics: "✅ ሽያጭ ትንተና",
+                registration_fee: "ናይ ምዝገባ ክፍሊት:",
+                one_time_payment: "ሓደ ግዜ ክፍሊት ንሕሳብ ምርግጋጽ",
+                register_seller: "ከም ሻጢ ተመዝገብ",
+                browse_categories: "ምድባት ርአ",
+                vehicles: "ተሽከርከርቲ",
+                property: "ንብረትን ሪል እስቴትን",
+                mobile: "ሞባይልን ታብሌትን",
+                electronics: "ኤሌክትሮኒክስ",
+                home_furniture: "ገዛን ፈርኒቸርን",
+                fashion: "ፋሽን",
+                beauty: "ጽባቐን ውልቃዊ ክንክንን",
+                services: "አገልግሎታት",
+                repair: "ጽገናን ህንጻን",
+                commercial: "ንግዳዊ መሳርሒታት",
+                leisure: "ዝንግዓን ንጥፈታትን",
+                babies: "ህጻናትን ቆልዑን",
+                food: "መግብን ሕርሻን",
+                animals: "እንስሳታትን እንስሳ ቤትን",
+                jobs: "ስራሕን ቅጥራን",
+                guesthouse: "ናይ ጋሻ ቤት",
+                featured_products: "ዝተመረጹ ፍርያት",
+                back_to_home: "ናብ ቤት ተመለስ",
+                category_description: "ኣብዚ ምድብ ፍርያት ርአ",
+                no_products_category: "ኣብዚ ምድብ ክሳብ ሕጂ ፍርያት የለን",
+                sellers_add_products: "ሻጠት ድሕሪ ምዝገባን ፍቓድን ፍርያት ክውስኹ እዮም",
+                browse_other_categories: "ካልኦት ምድባት ርአ",
+                view_details: "ዝርዝር ርአ",
+                no_products_yet: "ክሳብ ሕጂ ፍርያት የለን",
+                sellers_will_add: "ሻጠት ድሕሪ ምዝገባን ፍቓድን ፍርያት ክውስኹ እዮም",
+                buyer_dashboard: "ዓሪፍ ዳሽቦርድ",
+                total_orders: "ጠቅላላ ትእዛዛት",
+                total_spent: "ጠቅላላ ዝተኸፈለ",
+                pending_orders: "ዝጸንሑ ትእዛዛት",
+                recent_orders: "ናይ ቀረባ ትእዛዛት",
+                no_orders_yet: "ክሳብ ሕጂ ትእዛዝ የለን። ዕዳጋ ጀምሩ ትእዛዛትኩም ክትርእዩ!",
+                buyer_registration: "ዓሪፍ ምዝገባ",
+                no_fees_buyers: "ንዓረፍቲ ክፍሊት የድልን",
+                full_name: "ምሉእ ስም",
+                email_address: "ኢመይል አድራሻ",
+                phone_number: "ተሌፎን ቁጽሪ",
+                password: "ፓስወርድ"
+            },
+            am: {
+                secure_platform: "ደህንነቱ የተጠበቀ የንግድ መድረክ",
+                search_products: "ምርቶችን ይፈልጉ...",
+                search: "ፈልግ",
+                buyer_signup: "ገዢ ምዝገባ",
+                seller_signup: "ሻጭ ምዝገባ",
+                login: "ግባ",
+                my_dashboard: "የእኔ ዳሽቦርድ",
+                my_orders: "የእኔ ትዕዛዞች",
+                seller_dashboard: "ሻጭ ዳሽቦርድ",
+                my_products: "የእኔ ምርቶች",
+                sales_reports: "የሽያጭ ሪፖርቶች",
+                admin_panel: "አስተዳዳሪ ፓነል",
+                user_management: "ተጠቃሚ አስተዳደር",
+                payment_verification: "ክፍያ ማረጋገጫ",
+                logout: "ውጣ",
+                welcome_message: "ወደ ዋና የኡጋንዳ ገበያ እንኳን በደህና መጡ",
+                hero_description: "በኡጋንዳ ውስጥ የተረጋገጡ ገዢዎችን እና ሻጮችን የሚያገናኝ ደህንነቱ የተጠበቀ መድረክ። ዛሬ በመተማመን ንግድ ይጀምሩ።",
+                for_buyers: "ለገዢዎች",
+                buyer_description: "በነጻ ይመዝገቡ እና ከተረጋገጡ ሻጮች ግዢ ይጀምሩ",
+                free_registration: "✅ ነጻ ምዝገባ",
+                browse_products: "✅ የተረጋገጡ ምርቶችን ይመልከቱ",
+                secure_payments: "✅ ደህንነቱ የተጠበቀ ክፍያ",
+                order_tracking: "✅ ትዕዛዝ ክትትል",
+                register_buyer_free: "እንደ ገዢ ይመዝገቡ - ነጻ",
+                for_sellers: "ለሻጮች",
+                seller_description: "የተረጋገጠ ሻጭ አውታረ መረብ ይቀላቀሉ",
+                verified_status: "✅ የተረጋገጠ ሻጭ ደረጃ",
+                product_tools: "✅ የምርት አስተዳደር መሳሪያዎች",
+                sales_analytics: "✅ የሽያጭ ትንታኔ",
+                registration_fee: "የምዝገባ ክፍያ:",
+                one_time_payment: "ለሂሳብ ማረጋገጫ አንድ ጊዜ ክፍያ",
+                register_seller: "እንደ ሻጭ ይመዝገቡ",
+                browse_categories: "ምድቦችን ይመልከቱ",
+                vehicles: "ተሽከርካሪዎች",
+                property: "ንብረት እና ሪል እስቴት",
+                mobile: "ሞባይል ስልኮች እና ታብሌቶች",
+                electronics: "ኤሌክትሮኒክስ",
+                home_furniture: "ቤት እና ፈርኒቸር",
+                fashion: "ፋሽን",
+                beauty: "ውበት እና የግል እንክብካቤ",
+                services: "አገልግሎቶች",
+                repair: "ጥገና እና ግንባታ",
+                commercial: "የንግድ መሳሪያዎች",
+                leisure: "መዝናኛ እና እንቅስቃሴዎች",
+                babies: "ሕፃናት እና ልጆች",
+                food: "ምግብ እና ግብርና",
+                animals: "እንስሳት እና የቤት እንስሳት",
+                jobs: "ስራዎች እና ቅጥር",
+                guesthouse: "የእንግዳ ማረፊያ",
+                featured_products: "የተመረጡ ምርቶች",
+                back_to_home: "ወደ ቤት ተመለስ",
+                category_description: "በዚህ ምድብ ውስጥ ምርቶችን ይመልከቱ",
+                no_products_category: "በዚህ ምድብ ውስጥ እስካሁን ምርቶች የሉም",
+                sellers_add_products: "ሻጮች ከምዝገባ እና ከማጽደቅ በኋላ ምርቶችን ይጨምራሉ",
+                browse_other_categories: "ሌሎች ምድቦችን ይመልከቱ",
+                view_details: "ዝርዝሮችን ይመልከቱ",
+                no_products_yet: "እስካሁን ምርቶች የሉም",
+                sellers_will_add: "ሻጮች ከምዝገባ እና ከማጽደቅ በኋላ ምርቶችን ይጨምራሉ",
+                buyer_dashboard: "ገዢ ዳሽቦርድ",
+                total_orders: "ጠቅላላ ትዕዛዞች",
+                total_spent: "ጠቅላላ የተወጣ",
+                pending_orders: "በመጠባበቅ ላይ ያሉ ትዕዛዞች",
+                recent_orders: "የቅርብ ጊዜ ትዕዛዞች",
+                no_orders_yet: "እስካሁን ትዕዛዞች የሉም። ትዕዛዞችዎን ለማየት ግዢ ይጀምሩ!",
+                buyer_registration: "ገዢ ምዝገባ",
+                no_fees_buyers: "ለገዢዎች ክፍያ አያስፈልግም",
+                full_name: "ሙሉ ስም",
+                email_address: "የኢሜይል አድራሻ",
+                phone_number: "የስልክ ቁጥር",
+                password: "የይለፍ ቃል"
+            }
+        };
+
+        // Current language
+        let currentLanguage = 'en';
+
+        // Language change function
+        function changeLanguage() {
+            const selectedLanguage = document.getElementById('languageSelector').value;
+            currentLanguage = selectedLanguage;
+            
+            // Update text direction for RTL languages if needed
+            if (selectedLanguage === 'ar' || selectedLanguage === 'he') {
+                document.body.classList.add('rtl');
+                document.body.classList.remove('ltr');
+            } else {
+                document.body.classList.add('ltr');
+                document.body.classList.remove('rtl');
+            }
+            
+            // Update all translatable elements
+            updateTranslations();
+            
+            // Save language preference
+            localStorage.setItem('preferredLanguage', selectedLanguage);
+        }
+
+        // Update translations function
+        function updateTranslations() {
+            const elements = document.querySelectorAll('[data-translate]');
+            elements.forEach(element => {
+                const key = element.getAttribute('data-translate');
+                if (translations[currentLanguage] && translations[currentLanguage][key]) {
+                    element.textContent = translations[currentLanguage][key];
+                }
+            });
+            
+            // Update placeholders
+            const placeholderElements = document.querySelectorAll('[data-translate-placeholder]');
+            placeholderElements.forEach(element => {
+                const key = element.getAttribute('data-translate-placeholder');
+                if (translations[currentLanguage] && translations[currentLanguage][key]) {
+                    element.placeholder = translations[currentLanguage][key];
+                }
+            });
+        }
+
+        // Global state
+        let currentUser = null;
+        let currentSection = 'home';
+        let allUsers = [];
+        let allProducts = [];
+        let allOrders = [];
+        let allPayments = [];
+        let isDataSdkReady = false;
+        let pendingSellerData = null;
+
+        // Configuration
+        const defaultConfig = {
+            platform_name: 'ዕዳጋ ሓበሻ Uganda Marketplace Pro',
+            seller_fee: '25000',
+            welcome_message: "Welcome to Uganda's Premier Marketplace",
+            support_email: 'support@ugandamarketplace.com'
+        };
+
+        // Element SDK Implementation
+        const element = {
+            defaultConfig: defaultConfig,
+            render: async (config) => {
+                document.getElementById('platformName').textContent = config.platform_name || defaultConfig.platform_name;
+                document.getElementById('sellerFee').textContent = config.seller_fee || defaultConfig.seller_fee;
+                document.getElementById('welcomeMessage').textContent = config.welcome_message || defaultConfig.welcome_message;
+                
+                // Update title
+                document.title = (config.platform_name || defaultConfig.platform_name) + ' - Secure Trading Platform';
+            },
+            mapToCapabilities: (config) => ({
+                recolorables: [],
+                borderables: [],
+                fontEditable: undefined,
+                fontSizeable: undefined
+            }),
+            mapToEditPanelValues: (config) => new Map([
+                ['platform_name', config.platform_name || defaultConfig.platform_name],
+                ['seller_fee', config.seller_fee || defaultConfig.seller_fee],
+                ['welcome_message', config.welcome_message || defaultConfig.welcome_message],
+                ['support_email', config.support_email || defaultConfig.support_email]
+            ])
+        };
+
+        // Navigation Functions
+        function showSection(sectionName) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            const targetSection = document.getElementById(sectionName + 'Section');
+            if (targetSection) {
+                targetSection.classList.add('active');
+                currentSection = sectionName;
+            }
+        }
+
+        // Category Functions
+        function showCategoryProducts(category) {
+            // Create category products section if it doesn't exist
+            let categorySection = document.getElementById('categoryProductsSection');
+            if (!categorySection) {
+                categorySection = document.createElement('div');
+                categorySection.id = 'categoryProductsSection';
+                categorySection.className = 'section';
+                document.querySelector('.container').appendChild(categorySection);
+            }
+            
+            // Get category display name
+            const categoryNames = {
+                vehicles: { en: 'Vehicles', ti: 'ተሽከርከርቲ', am: 'ተሽከርካሪዎች' },
+                property: { en: 'Property & Real Estate', ti: 'ንብረትን ሪል እስቴትን', am: 'ንብረት እና ሪል እስቴት' },
+                mobile: { en: 'Mobile Phones & Tablets', ti: 'ሞባይልን ታብሌትን', am: 'ሞባይል ስልኮች እና ታብሌቶች' },
+                electronics: { en: 'Electronics', ti: 'ኤሌክትሮኒክስ', am: 'ኤሌክትሮኒክስ' },
+                home: { en: 'Home & Furniture', ti: 'ገዛን ፈርኒቸርን', am: 'ቤት እና ፈርኒቸር' },
+                fashion: { en: 'Fashion', ti: 'ፋሽን', am: 'ፋሽን' },
+                beauty: { en: 'Beauty & Personal Care', ti: 'ጽባቐን ውልቃዊ ክንክንን', am: 'ውበት እና የግል እንክብካቤ' },
+                services: { en: 'Services', ti: 'አገልግሎታት', am: 'አገልግሎቶች' },
+                repair: { en: 'Repair & Construction', ti: 'ጽገናን ህንጻን', am: 'ጥገና እና ግንባታ' },
+                commercial: { en: 'Commercial Equipment', ti: 'ንግዳዊ መሳርሒታት', am: 'የንግድ መሳሪያዎች' },
+                leisure: { en: 'Leisure & Activities', ti: 'ዝንግዓን ንጥፈታትን', am: 'መዝናኛ እና እንቅስቃሴዎች' },
+                babies: { en: 'Babies & Kids', ti: 'ህጻናትን ቆልዑን', am: 'ሕፃናት እና ልጆች' },
+                food: { en: 'Food & Agriculture', ti: 'መግብን ሕርሻን', am: 'ምግብ እና ግብርና' },
+                animals: { en: 'Animals & Pets', ti: 'እንስሳታትን እንስሳ ቤትን', am: 'እንስሳት እና የቤት እንስሳት' },
+                jobs: { en: 'Jobs & Employment', ti: 'ስራሕን ቅጥራን', am: 'ስራዎች እና ቅጥር' },
+                guesthouse: { en: 'Guest House', ti: 'ናይ ጋሻ ቤት', am: 'የእንግዳ ማረፊያ' }
+            };
+            
+            const categoryName = categoryNames[category] ? categoryNames[category][currentLanguage] : category;
+            
+            // Filter products by category
+            const categoryProducts = allProducts.filter(product => product.category === category);
+            
+            // Update section content
+            categorySection.innerHTML = `
+                <div class="mb-8">
+                    <button onclick="showSection('home')" class="flex items-center space-x-2 text-purple-600 hover:text-purple-800 mb-4 transition-colors duration-200">
+                        <span>←</span>
+                        <span data-translate="back_to_home">Back to Home</span>
+                    </button>
+                    <h2 class="text-4xl font-bold text-gray-800 mb-2">${categoryName}</h2>
+                    <p class="text-gray-600" data-translate="category_description">Browse products in this category</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    ${categoryProducts.length > 0 ? 
+                        categoryProducts.map(product => `
+                            <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105">
+                                <div class="h-48 bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center">
+                                    <span class="text-6xl">${getProductIcon(category)}</span>
+                                </div>
+                                <div class="p-6">
+                                    <h3 class="font-bold text-lg text-gray-800 mb-2">${product.name}</h3>
+                                    <p class="text-gray-600 text-sm mb-3 line-clamp-2">${product.description}</p>
+                                    <div class="flex items-center justify-between mb-4">
+                                        <span class="text-2xl font-bold text-purple-600">${product.price} UGX</span>
+                                        <span class="text-sm text-gray-500">${product.location}</span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs text-gray-500">By ${product.sellerName}</span>
+                                        <button onclick="viewProduct('${product.id}')" class="btn-primary text-white px-4 py-2 rounded-lg text-sm font-medium">
+                                            <span data-translate="view_details">View Details</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('') 
+                        : `
+                            <div class="col-span-full text-center py-16">
+                                <div class="text-8xl mb-6">${getProductIcon(category)}</div>
+                                <h3 class="text-2xl font-bold text-gray-800 mb-4" data-translate="no_products_category">No products in this category yet</h3>
+                                <p class="text-gray-600 mb-8" data-translate="sellers_add_products">Sellers will add products after registration and approval</p>
+                                <button onclick="showSection('home')" class="btn-primary text-white px-6 py-3 rounded-xl font-medium">
+                                    <span data-translate="browse_other_categories">Browse Other Categories</span>
+                                </button>
+                            </div>
+                        `
+                    }
+                </div>
+            `;
+            
+            // Show the category section
+            showSection('categoryProducts');
+            
+            // Update translations for the new content
+            updateTranslations();
+        }
+        
+        // Get product icon for category
+        function getProductIcon(category) {
+            const icons = {
+                vehicles: '🚗',
+                property: '🏠',
+                mobile: '📱',
+                electronics: '💻',
+                home: '🛋️',
+                fashion: '👗',
+                beauty: '💄',
+                services: '🔧',
+                repair: '🔨',
+                commercial: '⚙️',
+                leisure: '🎯',
+                babies: '👶',
+                food: '🌾',
+                animals: '🐕',
+                jobs: '💼',
+                guesthouse: '🏨'
+            };
+            return icons[category] || '📦';
+        }
+        
+        // View product details
+        function viewProduct(productId) {
+            const product = allProducts.find(p => p.id === productId);
+            if (product) {
+                showNotification(`Viewing ${product.name} - Product details feature coming soon!`, 'info');
+            }
+        }
+
+        // Modal Functions
+        function showBuyerRegisterModal() {
+            document.getElementById('buyerRegisterModal').classList.remove('hidden');
+            document.getElementById('buyerRegisterModal').classList.add('flex');
+        }
+
+        function showSellerRegisterModal() {
+            document.getElementById('sellerRegisterModal').classList.remove('hidden');
+            document.getElementById('sellerRegisterModal').classList.add('flex');
+        }
+
+        function showLoginModal() {
+            document.getElementById('loginModal').classList.remove('hidden');
+            document.getElementById('loginModal').classList.add('flex');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            document.getElementById(modalId).classList.remove('flex');
+        }
+
+        // Registration Functions
+        async function handleBuyerRegister(event) {
+            event.preventDefault();
+            
+            const btn = document.getElementById('buyerRegisterBtn');
+            const spinner = document.getElementById('buyerRegisterSpinner');
+            
+            btn.classList.add('hidden');
+            spinner.classList.remove('hidden');
+            
+            try {
+                const userData = {
+                    id: generateId(),
+                    type: 'user',
+                    name: document.getElementById('buyerName').value,
+                    email: document.getElementById('buyerEmail').value,
+                    phone: document.getElementById('buyerPhone').value,
+                    role: 'buyer',
+                    accountStatus: 'approved',
+                    paymentStatus: 'free',
+                    registrationDate: new Date().toISOString()
+                };
+                
+                if (isDataSdkReady) {
+                    const result = await window.dataSdk.create(userData);
+                    if (result.isOk) {
+                        showNotification('Buyer registration successful! You can now login.', 'success');
+                        closeModal('buyerRegisterModal');
+                        document.getElementById('buyerRegisterModal').querySelector('form').reset();
+                    } else {
+                        showNotification('Registration failed. Please try again.', 'error');
+                    }
+                } else {
+                    showNotification('Registration successful! You can now login.', 'success');
+                    closeModal('buyerRegisterModal');
+                }
+            } catch (error) {
+                showNotification('Registration failed. Please try again.', 'error');
+            } finally {
+                btn.classList.remove('hidden');
+                spinner.classList.add('hidden');
+            }
+        }
+
+        // Seller Registration
+        async function handleSellerRegister(event) {
+            event.preventDefault();
+            
+            const btn = document.getElementById('sellerRegisterBtn');
+            const spinner = document.getElementById('sellerRegisterSpinner');
+            
+            btn.classList.add('hidden');
+            spinner.classList.remove('hidden');
+            
+            try {
+                const userData = {
+                    id: generateId(),
+                    type: 'user',
+                    businessName: document.getElementById('sellerBusinessName').value,
+                    name: document.getElementById('sellerName').value,
+                    email: document.getElementById('sellerEmail').value,
+                    phone: document.getElementById('sellerPhone').value,
+                    role: 'seller',
+                    accountStatus: 'pending',
+                    paymentStatus: 'pending',
+                    registrationDate: new Date().toISOString()
+                };
+                
+                if (isDataSdkReady) {
+                    const result = await window.dataSdk.create(userData);
+                    if (result.isOk) {
+                        showNotification('Seller registration submitted! Please complete payment for verification.', 'success');
+                        closeModal('sellerRegisterModal');
+                        document.getElementById('sellerRegisterModal').querySelector('form').reset();
+                    } else {
+                        showNotification('Registration failed. Please try again.', 'error');
+                    }
+                } else {
+                    showNotification('Seller registration submitted! Please complete payment for verification.', 'success');
+                    closeModal('sellerRegisterModal');
+                }
+            } catch (error) {
+                showNotification('Registration failed. Please try again.', 'error');
+            } finally {
+                btn.classList.remove('hidden');
+                spinner.classList.add('hidden');
+            }
+        }
+
+        // Login Function
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const btn = document.getElementById('loginBtn');
+            const spinner = document.getElementById('loginSpinner');
+            const email = document.getElementById('loginEmail').value;
+            
+            btn.classList.add('hidden');
+            spinner.classList.remove('hidden');
+            
+            try {
+                // Find user by email
+                const user = allUsers.find(u => u.email === email);
+                
+                if (user) {
+                    if (user.accountStatus === 'approved') {
+                        currentUser = user;
+                        updateUserInterface();
+                        showNotification(`Welcome back, ${user.name}!`, 'success');
+                        closeModal('loginModal');
+                        document.getElementById('loginModal').querySelector('form').reset();
+                        
+                        // Navigate to appropriate dashboard
+                        if (user.role === 'buyer') {
+                            showSection('buyerDashboard');
+                        } else if (user.role === 'seller') {
+                            showSection('sellerDashboard');
+                        } else if (user.role === 'admin') {
+                            showSection('adminDashboard');
+                        }
+                    } else {
+                        showNotification('Account pending approval. Please wait for verification.', 'error');
+                    }
+                } else {
+                    showNotification('Invalid email or password.', 'error');
+                }
+            } catch (error) {
+                showNotification('Login failed. Please try again.', 'error');
+            } finally {
+                btn.classList.remove('hidden');
+                spinner.classList.add('hidden');
+            }
+        }
+
+        // User Interface Updates
+        function updateUserInterface() {
+            if (currentUser) {
+                // Hide auth buttons, show user menu
+                document.getElementById('authButtons').classList.add('hidden');
+                document.getElementById('userMenu').classList.remove('hidden');
+                
+                // Update user info
+                document.getElementById('userName').textContent = currentUser.name;
+                document.getElementById('userRole').textContent = currentUser.role.charAt(0).toUpperCase() + currentUser.role.slice(1);
+                document.getElementById('userInitial').textContent = currentUser.name.charAt(0).toUpperCase();
+                
+                // Show appropriate menu
+                document.getElementById('buyerMenu').classList.add('hidden');
+                document.getElementById('sellerMenu').classList.add('hidden');
+                document.getElementById('adminMenu').classList.add('hidden');
+                
+                if (currentUser.role === 'buyer') {
+                    document.getElementById('buyerMenu').classList.remove('hidden');
+                } else if (currentUser.role === 'seller') {
+                    document.getElementById('sellerMenu').classList.remove('hidden');
+                } else if (currentUser.role === 'admin') {
+                    document.getElementById('adminMenu').classList.remove('hidden');
+                }
+            } else {
+                // Show auth buttons, hide user menu
+                document.getElementById('authButtons').classList.remove('hidden');
+                document.getElementById('userMenu').classList.add('hidden');
+            }
+        }
+
+        // User Dropdown Toggle
+        function toggleUserDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        // Logout Function
+        function logout() {
+            currentUser = null;
+            updateUserInterface();
+            showSection('home');
+            showNotification('Logged out successfully!', 'success');
+        }
+
+        // Search Function
+        function performSearch() {
+            const searchTerm = document.getElementById('headerSearch').value.toLowerCase();
+            if (searchTerm.trim()) {
+                const results = allProducts.filter(product => 
+                    product.name.toLowerCase().includes(searchTerm) ||
+                    product.description.toLowerCase().includes(searchTerm) ||
+                    product.category.toLowerCase().includes(searchTerm)
+                );
+                
+                if (results.length > 0) {
+                    showNotification(`Found ${results.length} products matching "${searchTerm}"`, 'success');
+                } else {
+                    showNotification(`No products found matching "${searchTerm}"`, 'info');
+                }
+            }
+        }
+
+        // Admin Functions
+        function filterUsers(type) {
+            const filteredUsers = type === 'all' ? allUsers : allUsers.filter(user => user.role === type);
+            // Update users list display
+            showNotification(`Showing ${filteredUsers.length} ${type} users`, 'info');
+        }
+
+        // Seller Functions
+        function showAddProductModal() {
+            showNotification('Add Product feature coming soon!', 'info');
+        }
+
+        // Utility Functions
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg text-white max-w-sm ${
+                type === 'success' ? 'bg-green-500' : 
+                type === 'error' ? 'bg-red-500' : 'bg-blue-500'
+            }`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+
+        // Data SDK Handler
+        const dataHandler = {
+            onDataChanged(data) {
+                allUsers = data.filter(item => item.type === 'user');
+                allProducts = data.filter(item => item.type === 'product');
+                allOrders = data.filter(item => item.type === 'order');
+                allPayments = data.filter(item => item.type === 'payment');
+            }
+        };
+
+        // Initialize Data SDK
+        async function initializeDataSdk() {
+            if (window.dataSdk) {
+                try {
+                    const result = await window.dataSdk.init(dataHandler);
+                    if (result.isOk) {
+                        isDataSdkReady = true;
+                        console.log('Data SDK initialized successfully');
+                    } else {
+                        console.error('Failed to initialize Data SDK:', result.error);
+                    }
+                } catch (error) {
+                    console.error('Error initializing Data SDK:', error);
+                }
+            }
+        }
+
+        // Initialize Element SDK
+        async function initializeElementSdk() {
+            if (window.elementSdk) {
+                try {
+                    await window.elementSdk.init(element);
+                    console.log('Element SDK initialized successfully');
+                } catch (error) {
+                    console.error('Error initializing Element SDK:', error);
+                }
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load saved language preference
+            const savedLanguage = localStorage.getItem('preferredLanguage');
+            if (savedLanguage && translations[savedLanguage]) {
+                currentLanguage = savedLanguage;
+                document.getElementById('languageSelector').value = savedLanguage;
+                updateTranslations();
+            }
+            
+            initializeDataSdk();
+            initializeElementSdk();
+        });
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9903e40e85da8a47',t:'MTc2MDc0NzA0Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+<!-- === EDAGA API WIRING START === -->
+<script>
+  // Set this to your Render backend URL, e.g. "https://api-yourapp.onrender.com"
+  // Or leave blank in local dev (defaults to http://localhost:8080)
+  window.EDAGA_API = window.EDAGA_API || "";
+
+  (function(){
+    const API = (window.EDAGA_API || "http://localhost:8080").replace(/\/$/,"");
+    const containerId = "edaga-live-products";
+    function ensureContainer(){
+      if(document.getElementById(containerId)) return;
+      const sec = document.createElement("section");
+      sec.id = containerId;
+      sec.className = "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 my-10";
+      sec.innerHTML = `
+        <h2 class="text-2xl font-bold mb-4">Live Products</h2>
+        <div id="edaga-products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        <div id="edaga-products-empty" class="text-gray-500 mt-4 hidden">No products yet.</div>
+      `;
+      // Try to insert in a reasonable place:
+      const target = document.querySelector("main") || document.body;
+      target.appendChild(sec);
+    }
+
+    function fmtUGX(x){
+      try { return "UGX " + Number(x).toLocaleString(); } catch(e){ return "UGX " + x; }
+    }
+
+    async function loadProducts(){
+      ensureContainer();
+      const grid = document.getElementById("edaga-products-grid");
+      const empty = document.getElementById("edaga-products-empty");
+      grid.innerHTML = "";
+      try {
+        const res = await fetch(API + "/products");
+        const items = await res.json();
+        if(!Array.isArray(items) || items.length === 0){
+          empty.classList.remove("hidden"); return;
+        }
+        empty.classList.add("hidden");
+        for(const p of items){
+          const card = document.createElement("div");
+          card.className = "rounded-2xl shadow p-4 bg-white/70 backdrop-blur";
+          const waBtn = p.whatsappLink ? `<a href="${p.whatsappLink}" target="_blank" class="inline-flex items-center px-3 py-2 rounded-lg bg-green-600 text-white hover:opacity-90">WhatsApp Seller</a>` : "";
+          const callBtn = p.phoneLink ? `<a href="${p.phoneLink}" class="inline-flex items-center px-3 py-2 rounded-lg bg-blue-600 text-white hover:opacity-90">Call Seller</a>` : "";
+          card.innerHTML = `
+            <div class="flex items-start justify-between gap-3">
+              <h3 class="text-lg font-semibold">${p.name || "Product"}</h3>
+              <span class="text-sm px-2 py-1 rounded bg-gray-100">${p.category || ""}</span>
+            </div>
+            <div class="mt-2 text-gray-700 line-clamp-3">${p.description || ""}</div>
+            <div class="mt-3 font-bold">${fmtUGX(p.priceUGX)}</div>
+            <div class="mt-4 flex gap-2">${waBtn} ${callBtn}</div>
+          `;
+          grid.appendChild(card);
+        }
+      } catch(e){
+        console.error("Load products failed", e);
+        ensureContainer();
+        const err = document.createElement("div");
+        err.className = "text-red-600 mt-4";
+        err.textContent = "Failed to load products from API. Check window.EDAGA_API or CORS.";
+        document.getElementById(containerId).appendChild(err);
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", loadProducts);
+  })();
+</script>
+<!-- === EDAGA API WIRING END === -->
+
+</body>
+</html>

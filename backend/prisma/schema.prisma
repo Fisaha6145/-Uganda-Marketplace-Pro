@@ -1,174 +1,38 @@
-// ---------- Generators & Datasource ----------
-generator client {
-  provider = "prisma-client-js"
-}
-
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
-// ---------- Enums ----------
-enum Role {
-  BUYER
-  SELLER
-  ADMIN
-}
-
-enum AccountStatus {
-  PENDING
-  APPROVED
-  REJECTED
-  SUSPENDED
-}
-
-enum OrderStatus {
-  PENDING
-  PAID
-  SHIPPED
-  COMPLETED
-  CANCELLED
-}
-
-// Keep this short; you can expand later in app code if needed.
-enum Category {
-  Vehicles
-  Property
-  MobilePhones
-  Electronics
-  HomeAppliances
-  Fashion
-  HealthBeauty
-  SportsFitness
-  Agriculture
-  Jobs
-  Services
-  FoodBeverage
-  KidsBabies
-  Pets
-  BooksMedia
-  Others
-}
-
-// ---------- Models ----------
 model User {
   id            String         @id @default(cuid())
   email         String         @unique
   passwordHash  String
   role          Role           @default(BUYER)
   fullName      String?
-  phoneE164     String?        // normalized +256...
+  phoneE164     String?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
-
-  // account status track (for sellers)
   status        AccountStatus  @default(PENDING)
 
-  // relations
   seller        SellerVerification?
   products      Product[]
   orders        Order[]        @relation("BuyerOrders")
-  messages      Message[]      @relation("UserMessages")
+
+  // Paired sides for Message relations (MUST exist)
+  sentMessages     Message[]   @relation("SentMessages")
+  receivedMessages Message[]   @relation("ReceivedMessages")
 
   @@index([role, status])
 }
 
-model SellerVerification {
-  id             String        @id @default(cuid())
-  userId         String        @unique
-  businessName   String
-  tradingLicense String?       // stored path/ID
-  nationalId     String?       // stored path/ID
-  verifiedAt     DateTime?
-  createdAt      DateTime      @default(now())
-
-  user           User          @relation(fields: [userId], references: [id])
-}
-
-model Product {
-  id            String     @id @default(cuid())
-  sellerId      String
-  name          String
-  description   String?
-  category      Category
-  priceUGX      Int
-  stock         Int         @default(1)
-  // contact controls
-  showContact   Boolean     @default(true)
-  whatsappE164  String?
-  phoneE164     String?
-  // media
-  imageUrl      String?
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  isApproved    Boolean     @default(true)
-
-  seller        User        @relation(fields: [sellerId], references: [id])
-  orderItems    OrderItem[]
-
-  @@index([category])
-  @@index([sellerId])
-}
-
-model Order {
-  id          String       @id @default(cuid())
-  buyerId     String
-  status      OrderStatus  @default(PENDING)
-  totalUGX    Int          @default(0)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-
-  buyer       User         @relation("BuyerOrders", fields: [buyerId], references: [id])
-  items       OrderItem[]
-  payment     Payment?
-
-  @@index([buyerId, status])
-}
-
-model OrderItem {
-  id         String   @id @default(cuid())
-  orderId    String
-  productId  String
-  qty        Int      @default(1)
-  priceUGX   Int
-
-  order      Order    @relation(fields: [orderId], references: [id])
-  product    Product  @relation(fields: [productId], references: [id])
-
-  @@index([orderId])
-  @@index([productId])
-}
-
-model Payment {
-  id              String   @id @default(cuid())
-  orderId         String   @unique
-  provider        String   // e.g. "mock", "paystack", "flutterwave"
-  providerRef     String?
-  amountUGX       Int
-  commissionUGX   Int      @default(0)
-  status          String   @default("PENDING")
-  createdAt       DateTime @default(now())
-
-  order           Order    @relation(fields: [orderId], references: [id])
-}
-
-model Conversation {
-  id        String    @id @default(cuid())
-  createdAt DateTime  @default(now())
-  messages  Message[]
-}
-
 model Message {
-  id            String       @id @default(cuid())
+  id             String       @id @default(cuid())
   conversationId String
-  fromUserId    String
-  toUserId      String
-  body          String
-  createdAt     DateTime     @default(now())
+  fromUserId     String
+  toUserId       String
+  body           String
+  createdAt      DateTime     @default(now())
 
   conversation  Conversation @relation(fields: [conversationId], references: [id])
-  fromUser      User         @relation("UserMessages", fields: [fromUserId], references: [id])
-  toUser        User         @relation(fields: [toUserId], references: [id])
+
+  // Name each relation & pair to User arrays above
+  fromUser      User         @relation("SentMessages",     fields: [fromUserId], references: [id])
+  toUser        User         @relation("ReceivedMessages", fields: [toUserId],   references: [id])
 
   @@index([fromUserId])
   @@index([toUserId])
